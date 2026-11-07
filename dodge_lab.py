@@ -88,6 +88,8 @@ def load_brawler_profiles():
 
     required = ("label", "max_hp", "move_speed", "radius")
     for profile_id, profile in external_profiles.items():
+        if isinstance(profile_id, str) and profile_id.startswith("_"):
+            continue  # metadata keys such as _notice are not profiles
         if not isinstance(profile_id, str) or not isinstance(profile, dict):
             print(f"[profiles] Skipping invalid profile entry: {profile_id!r}")
             continue
