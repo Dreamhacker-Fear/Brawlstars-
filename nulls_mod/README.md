@@ -1,24 +1,11 @@
-# Null's Brawl data adapter (project scaffold)
+# Null's Brawl data adapter scaffold
 
-This folder is a **reference/scaffold** for keeping local simulation data separate from the dodge planner.
+This directory documents the boundary between the offline simulator and the community mod format.
 
-## Current status
+- The simulator reads local JSON fixtures under \`../brawler_data/\`.
+- The fixtures are synthetic examples, not official balance values or a ready-to-install mod.
+- The linked Modification Portal documents \`content.json\` table patches and CSV data.
+- Before making an actual package, use the exact schema, supported tables, column types and game-version metadata from the portal and the intended Null's Brawl release.
+- This project does not execute Python inside Null's Brawl or connect to its live process.
 
-- The simulator reads `../brawler_data/profiles.json` for local profile overrides.
-- The JSON values currently supplied are demo archetypes, **not official game balance values**.
-- This folder does not contain an installable Null's Brawl mod yet.
-- No live game connection, client modification, process inspection, or match-input automation is included.
-
-## Mod-format notes
-
-The [Null's Brawl Modification Portal](https://github.com/ilynl7/nulls-brawl-modification-portal) documents mods as `content.json` packages that apply supported table patches. The portal describes CSV tables such as `characters`, `skills`, `maps`, and projectile/status-effect tables.
-
-Before creating a real package, use the portal's current schema and the exact table/column names from the matching game-data version. Do not guess identifiers or copy demo simulator values into a game patch.
-
-## Planned safe workflow
-
-1. Export or manually curate a version-labelled, offline data snapshot.
-2. Normalize the fields needed by the simulator into `brawler_data/profiles.json`.
-3. Add map and projectile test fixtures as separate JSON files.
-4. Validate JSON and run offline simulation/replay tests.
-5. Treat any Null's mod package as a separate, optional resource/data patch—not as a way to execute the Python dodge planner.
+Reference: https://github.com/ilynl7/nulls-brawl-modification-portal
