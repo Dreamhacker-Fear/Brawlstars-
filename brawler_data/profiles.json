@@ -1,0 +1,67 @@
+{
+  "_notice": "DEMO SIMULATION VALUES ONLY. These are archetypes, not official Null's Brawl or Brawl Stars balance values.",
+  "balanced": {
+    "label": "Balanced (demo)",
+    "max_hp": 100,
+    "move_speed": 170,
+    "radius": 12,
+    "attack_range": 420,
+    "projectile_speed": 360,
+    "reload_s": 1.4,
+    "attack_pattern": "single",
+    "super": "custom",
+    "gadget": "custom",
+    "star_powers": [
+      "custom",
+      "custom"
+    ]
+  },
+  "speedster": {
+    "label": "Speedster (demo)",
+    "max_hp": 85,
+    "move_speed": 205,
+    "radius": 11,
+    "attack_range": 360,
+    "projectile_speed": 330,
+    "reload_s": 1.2,
+    "attack_pattern": "burst",
+    "super": "mobility",
+    "gadget": "custom",
+    "star_powers": [
+      "custom",
+      "custom"
+    ]
+  },
+  "tank": {
+    "label": "Tank (demo)",
+    "max_hp": 150,
+    "move_speed": 150,
+    "radius": 15,
+    "attack_range": 190,
+    "projectile_speed": 250,
+    "reload_s": 1.6,
+    "attack_pattern": "short_range",
+    "super": "area_or_mobility",
+    "gadget": "custom",
+    "star_powers": [
+      "custom",
+      "custom"
+    ]
+  },
+  "thrower": {
+    "label": "Thrower (demo)",
+    "max_hp": 90,
+    "move_speed": 160,
+    "radius": 12,
+    "attack_range": 500,
+    "projectile_speed": 230,
+    "reload_s": 1.7,
+    "attack_pattern": "lobbed_area",
+    "super": "area_denial",
+    "gadget": "custom",
+    "star_powers": [
+      "custom",
+      "custom"
+    ]
+  }
+}
