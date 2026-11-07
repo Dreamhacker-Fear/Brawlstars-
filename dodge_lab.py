@@ -31,8 +31,48 @@ import sys
 import pygame
 
 S = 640            # arena size (px)
-PS = 170           # player speed (px/s)
-PR, BR = 12, 6     # player radius, projectile radius
+PS = 170           # fallback player speed (px/s)
+PR, BR = 12, 6     # fallback player radius, projectile radius
+
+# SIMULATION DATA ONLY — these are editable example archetypes, NOT official
+# Brawl Stars balance values. Replace them only with values from your own
+# documented/offline test dataset. Each brawler needs its own complete profile.
+BRAWLER_PROFILES = {
+    "balanced": {
+        "label": "Balanced", "max_hp": 100, "move_speed": 170, "radius": 12,
+        "attack_range": 420, "projectile_speed": 360, "reload_s": 1.4,
+        "attack_pattern": "single", "super": "custom", "gadget": "custom",
+        "star_powers": ("custom", "custom"),
+    },
+    "speedster": {
+        "label": "Speedster", "max_hp": 85, "move_speed": 205, "radius": 11,
+        "attack_range": 360, "projectile_speed": 330, "reload_s": 1.2,
+        "attack_pattern": "burst", "super": "mobility", "gadget": "custom",
+        "star_powers": ("custom", "custom"),
+    },
+    "tank": {
+        "label": "Tank", "max_hp": 150, "move_speed": 150, "radius": 15,
+        "attack_range": 190, "projectile_speed": 250, "reload_s": 1.6,
+        "attack_pattern": "short_range", "super": "area_or_mobility", "gadget": "custom",
+        "star_powers": ("custom", "custom"),
+    },
+    "thrower": {
+        "label": "Thrower", "max_hp": 90, "move_speed": 160, "radius": 12,
+        "attack_range": 500, "projectile_speed": 230, "reload_s": 1.7,
+        "attack_pattern": "lobbed_area", "super": "area_denial", "gadget": "custom",
+        "star_powers": ("custom", "custom"),
+    },
+}
+
+# GAME-SYSTEM CHECKLIST FOR FUTURE OFFLINE SIMULATION WORK:
+# - Map geometry: solid walls, destructible cover, bushes, water and jumpable gaps.
+# - Mode rules: objective zones, ball/goal rules, safe/robot/boss objectives, timers.
+# - Combat: projectile vs hitscan, spread, burst, piercing, bounce, lobbed shots,
+#   splash radius, reload/ammo, damage falloff, shields and temporary invulnerability.
+# - Abilities: Super charge, gadgets, Star Powers, Hypercharge and status effects.
+# - Match context: team/enemy positions, vision/hidden state, respawns and modifiers.
+# Model each mechanic as data + an offline simulation rule; don't assume every
+# brawler, attack, map or game mode follows the same behavior.
 
 
 def miss_p(hp):
@@ -43,6 +83,8 @@ def miss_p(hp):
 class Game:
     def __init__(self):
         self.best = 0.0
+        self.brawler_id = "balanced"
+        self.apply_brawler_profile()
         self.auto = True
         self.dbg = True
         self.rate = 1.0
@@ -50,12 +92,26 @@ class Game:
         self.nz = 10        # perception noise (px)
         self.reset()
 
+    def apply_brawler_profile(self):
+        """Load one local simulation profile; no game client is queried."""
+        self.profile = BRAWLER_PROFILES[self.brawler_id]
+        self.player_speed = float(self.profile["move_speed"])
+        self.player_radius = float(self.profile["radius"])
+        self.max_hp = int(self.profile["max_hp"])
+
+    def select_brawler(self, profile_id):
+        if profile_id not in BRAWLER_PROFILES:
+            return
+        self.brawler_id = profile_id
+        self.apply_brawler_profile()
+        self.reset()
+
     def reset(self):
         self.px = self.py = S / 2
         self.vx = self.vy = 0.0
         self.B = []         # projectiles: [x, y, vx, vy, life, blind]
         self.hist = []      # (time, [(x, y, vx, vy), ...]) snapshots the bot "sees"
-        self.hp = 100
+        self.hp = self.max_hp
         self.hits = 0
         self.t = 0.0
         self.E = [[i * math.pi / 2 + 0.8, 1 + i * 0.35] for i in range(4)]  # [angle, cooldown]
@@ -105,8 +161,8 @@ class Game:
             d = (0.0, 0.0) if k < 0 else (math.cos(k / N * math.tau), math.sin(k / N * math.tau))
             cst, x, y = 0.0, self.px, self.py
             for s in range(1, H + 1):
-                x = min(S - 14, max(14, x + d[0] * PS * dt))
-                y = min(S - 14, max(14, y + d[1] * PS * dt))
+                x = min(S - 14, max(14, x + d[0] * self.player_speed * dt))
+                y = min(S - 14, max(14, y + d[1] * self.player_speed * dt))
                 tt = s * dt + lag
                 w = 1.5 - s / H
                 for bx, by, bvx, bvy in V:
@@ -146,9 +202,9 @@ class Game:
             l = math.hypot(x, y) or 1
             self.dir, self.cost = (x / l, y / l), []
 
-        self.vx, self.vy = self.dir[0] * PS, self.dir[1] * PS
-        self.px = min(S - PR, max(PR, self.px + self.vx * dt))
-        self.py = min(S - PR, max(PR, self.py + self.vy * dt))
+        self.vx, self.vy = self.dir[0] * self.player_speed, self.dir[1] * self.player_speed
+        self.px = min(S - self.player_radius, max(self.player_radius, self.px + self.vx * dt))
+        self.py = min(S - self.player_radius, max(self.player_radius, self.py + self.vy * dt))
 
         for e in self.E:
             e[0] += 0.35 * dt
@@ -161,7 +217,7 @@ class Game:
             b[0] += b[2] * dt
             b[1] += b[3] * dt
             b[4] -= dt
-            if math.hypot(self.px - b[0], self.py - b[1]) < PR + BR:
+            if b[4] > 0 and math.hypot(self.px - b[0], self.py - b[1]) < self.player_radius + BR:
                 b[4] = 0
                 self.hp -= 10
                 self.hits += 1
@@ -192,16 +248,16 @@ class Game:
             pygame.draw.rect(scr, (192, 57, 43), (x - 12, y - 12, 24, 24))
         for b in self.B:
             pygame.draw.circle(scr, (255, 176, 32), (int(b[0]), int(b[1])), BR)
-        pygame.draw.circle(scr, (77, 163, 255), (int(self.px), int(self.py)), PR)
+        pygame.draw.circle(scr, (77, 163, 255), (int(self.px), int(self.py)), self.player_radius)
 
         pygame.draw.rect(scr, (34, 34, 34), (20, 14, 200, 10))
         pygame.draw.rect(scr, (62, 207, 110) if self.hp > 30 else (229, 72, 77), (20, 14, 2 * max(0, self.hp), 10))
 
-        line1 = f"Health {self.hp}%"
+        line1 = f"{self.profile['label']}  HP {self.hp}/{self.max_hp}  speed {self.player_speed:.0f}  hitbox {self.player_radius}"
         if self.auto:
             line1 += f"  |  bot hit chance {miss_p(self.hp) * 100:.0f}%"
         line1 += f"  |  hits {self.hits}  |  alive {self.t:.1f}s  |  best {max(self.best, self.t):.1f}s"
-        line2 = (f"[B] bot {'ON' if self.auto else 'OFF'}  [G] debug  [1/2] reaction {self.rd * 1000:.0f}ms  "
+        line2 = (f"[F1-F4] brawler profile  [B] bot {'ON' if self.auto else 'OFF'}  [G] debug  [1/2] reaction {self.rd * 1000:.0f}ms  "
                  f"[3/4] noise {self.nz}px  [5/6] fire x{self.rate:.1f}")
         scr.blit(font.render(line1, True, (230, 230, 240)), (8, S + 6))
         scr.blit(font.render(line2, True, (150, 150, 170)), (8, S + 28))
@@ -221,7 +277,11 @@ def main():
                 sys.exit()
             if ev.type == pygame.KEYDOWN:
                 k = ev.key
-                if k == pygame.K_b: g.auto = not g.auto
+                if k == pygame.K_F1: g.select_brawler("balanced")
+                elif k == pygame.K_F2: g.select_brawler("speedster")
+                elif k == pygame.K_F3: g.select_brawler("tank")
+                elif k == pygame.K_F4: g.select_brawler("thrower")
+                elif k == pygame.K_b: g.auto = not g.auto
                 elif k == pygame.K_g: g.dbg = not g.dbg
                 elif k == pygame.K_r: g.reset()
                 elif k == pygame.K_1: g.rd = max(0.0, g.rd - 0.02)
