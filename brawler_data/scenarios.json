@@ -1,0 +1,71 @@
+{
+  "_notice": "Deterministic synthetic scenarios for offline tests. Coordinates are simulator units, not extracted match data.",
+  "scenarios": [
+    {
+      "id": "straight_incoming",
+      "map": "open_training",
+      "player": {
+        "x": 320,
+        "y": 320,
+        "speed": 170,
+        "radius": 12
+      },
+      "projectiles": [
+        {
+          "x": 320,
+          "y": 120,
+          "vx": 0,
+          "vy": 220,
+          "radius": 6,
+          "lifetime": 2,
+          "splash_radius": 0
+        }
+      ],
+      "expected": "planner_returns_direction"
+    },
+    {
+      "id": "wall_blocks_route",
+      "map": "cover_training",
+      "player": {
+        "x": 320,
+        "y": 320,
+        "speed": 170,
+        "radius": 12
+      },
+      "projectiles": [
+        {
+          "x": 320,
+          "y": 100,
+          "vx": 0,
+          "vy": 240,
+          "radius": 6,
+          "lifetime": 2,
+          "splash_radius": 0
+        }
+      ],
+      "expected": "planner_returns_direction"
+    },
+    {
+      "id": "crossing_projectile",
+      "map": "open_training",
+      "player": {
+        "x": 320,
+        "y": 320,
+        "speed": 160,
+        "radius": 12
+      },
+      "projectiles": [
+        {
+          "x": 100,
+          "y": 320,
+          "vx": 230,
+          "vy": 0,
+          "radius": 7,
+          "lifetime": 2,
+          "splash_radius": 10
+        }
+      ],
+      "expected": "planner_returns_direction"
+    }
+  ]
+}
