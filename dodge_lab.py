@@ -24,9 +24,11 @@ Keys
   3 / 4    perception noise -/+ 2 px
   5 / 6    turret fire rate -/+ 0.1x
 """
+import json
 import math
 import random
 import sys
+from pathlib import Path
 
 import pygame
 
@@ -63,6 +65,51 @@ BRAWLER_PROFILES = {
         "star_powers": ("custom", "custom"),
     },
 }
+
+# Optional local profile overrides. The built-in profiles above remain as fallbacks.
+# JSON values are local simulation inputs, not official or live game data.
+PROFILE_PATH = Path(__file__).resolve().parent / "brawler_data" / "profiles.json"
+
+
+def load_brawler_profiles():
+    profiles = dict(BRAWLER_PROFILES)
+    try:
+        with PROFILE_PATH.open("r", encoding="utf-8") as profile_file:
+            external_profiles = json.load(profile_file)
+    except FileNotFoundError:
+        return profiles
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"[profiles] Could not read {PROFILE_PATH}: {exc}; using built-in examples.")
+        return profiles
+
+    if not isinstance(external_profiles, dict):
+        print("[profiles] profiles.json must contain a JSON object; using built-in examples.")
+        return profiles
+
+    required = ("label", "max_hp", "move_speed", "radius")
+    for profile_id, profile in external_profiles.items():
+        if not isinstance(profile_id, str) or not isinstance(profile, dict):
+            print(f"[profiles] Skipping invalid profile entry: {profile_id!r}")
+            continue
+        if any(key not in profile for key in required):
+            print(f"[profiles] Skipping {profile_id!r}: missing one of {required}.")
+            continue
+        try:
+            normalized = dict(profile)
+            normalized["max_hp"] = int(normalized["max_hp"])
+            normalized["move_speed"] = float(normalized["move_speed"])
+            normalized["radius"] = float(normalized["radius"])
+            if normalized["max_hp"] <= 0 or normalized["move_speed"] <= 0 or normalized["radius"] <= 0:
+                raise ValueError("max_hp, move_speed and radius must be positive")
+            profiles[profile_id] = normalized
+        except (TypeError, ValueError) as exc:
+            print(f"[profiles] Skipping {profile_id!r}: {exc}")
+
+    return profiles
+
+
+BRAWLER_PROFILES = load_brawler_profiles()
+
 
 # GAME-SYSTEM CHECKLIST FOR FUTURE OFFLINE SIMULATION WORK:
 # - Map geometry: solid walls, destructible cover, bushes, water and jumpable gaps.
