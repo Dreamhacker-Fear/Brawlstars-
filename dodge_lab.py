@@ -1,6 +1,8 @@
 """
 Auto-Dodge Lab  --  Python 3.9+, pygame 2.x
 Run:  pip install pygame  &&  python dodge_lab.py
+Offline data runner:  python offline_scenarios.py
+Offline tests:  python -m unittest discover -s tests
 
 A self-contained top-down arena: 4 turrets fire aimed shots, a bot dodges them.
 The bot only reads this game's own state. It does not touch any other program.
