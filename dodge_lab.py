@@ -5,6 +5,18 @@ Run:  pip install pygame  &&  python dodge_lab.py
 A self-contained top-down arena: 4 turrets fire aimed shots, a bot dodges them.
 The bot only reads this game's own state. It does not touch any other program.
 
+OFFLINE ADAPTER NOTES
+- Keep the dodge planner (think) separate from whatever produces test observations.
+- For an offline replay or your own game, an observation adapter would normalize
+  player position/speed, projectile positions/velocities, arena bounds and frame time.
+- Feed those normalized values into a planner interface; do not couple the planner
+  to a particular game's internal classes or file formats.
+- The action side would consume the chosen direction and apply it only inside this
+  simulator or your own test environment.
+- This project intentionally has no live Brawl Stars connector. Do not add process
+  memory reading, code injection, protected-data extraction or automated live-match
+  input. Use recorded/offline data or a game you control for experiments.
+
 Keys
   B        bot on/off          G  debug rays on/off      R  reset
   WASD / arrows  move (when bot is off)
@@ -68,6 +80,11 @@ class Game:
                            random.random() < miss_p(self.hp)])
 
     # ---- bot ----
+    # OFFLINE INPUT EXTENSION POINT:
+    # This method currently reads simulated observations from self.hist / self.B
+    # and player state from self.px/self.py. If you build a replay/test adapter for
+    # your own environment, normalize its observations first, then pass them into
+    # a planner interface here. Keep game-specific parsing outside this method.
     def think(self):
         N, H, dt, safe = 16, 14, 0.05, 28
         snap = self.hist[0] if self.hist else None
@@ -108,6 +125,11 @@ class Game:
         self.dir, self.cost = bd, cs
 
     # ---- update ----
+    # OFFLINE OUTPUT EXTENSION POINT:
+    # self.dir is the planner's normalized movement choice (-1..1 on each axis).
+    # This simulator converts it to velocity below. A test harness for a game you
+    # own can consume the same abstract direction; keep this limited to that
+    # simulator/test harness rather than automating a public live-game client.
     def step(self, dt, keys):
         self.t += dt
         self.tk -= dt
