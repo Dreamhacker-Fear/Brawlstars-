@@ -1,0 +1,27 @@
+{
+  "_notice": "Synthetic projectile presets for offline prediction tests, not official game values.",
+  "straight": {
+    "label": "Straight shot (demo)",
+    "speed": 260,
+    "radius": 6,
+    "lifetime": 2.5,
+    "splash_radius": 0,
+    "gravity": 0
+  },
+  "fast": {
+    "label": "Fast shot (demo)",
+    "speed": 380,
+    "radius": 5,
+    "lifetime": 1.8,
+    "splash_radius": 0,
+    "gravity": 0
+  },
+  "lobbed": {
+    "label": "Lobbed area shot (demo)",
+    "speed": 190,
+    "radius": 7,
+    "lifetime": 2.2,
+    "splash_radius": 34,
+    "gravity": 0
+  }
+}
