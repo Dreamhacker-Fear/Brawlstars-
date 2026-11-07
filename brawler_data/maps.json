@@ -1,0 +1,43 @@
+{
+  "_notice": "Synthetic offline test arenas only. Geometry is invented for this simulator and is not copied from live game maps.",
+  "open_training": {
+    "label": "Open Training (synthetic)",
+    "width": 640,
+    "height": 640,
+    "walls": [],
+    "hazards": []
+  },
+  "cover_training": {
+    "label": "Cover Training (synthetic)",
+    "width": 640,
+    "height": 640,
+    "walls": [
+      {
+        "x": 260,
+        "y": 170,
+        "width": 120,
+        "height": 24
+      },
+      {
+        "x": 120,
+        "y": 360,
+        "width": 24,
+        "height": 130
+      },
+      {
+        "x": 470,
+        "y": 350,
+        "width": 24,
+        "height": 140
+      }
+    ],
+    "hazards": [
+      {
+        "x": 285,
+        "y": 430,
+        "radius": 42,
+        "cost": 2
+      }
+    ]
+  }
+}
