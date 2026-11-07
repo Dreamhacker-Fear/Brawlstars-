@@ -133,7 +133,7 @@ class Game:
         fan = (-0.28, 0, 0.28) if random.random() < 0.3 else (0,)
         for o in fan:
             self.B.append([ex, ey, math.cos(a + o) * sp, math.sin(a + o) * sp, 3.0,
-                           random.random() < miss_p(self.hp)])
+                           random.random() < miss_p(self.hp / self.max_hp * 100)])
 
     # ---- bot ----
     # OFFLINE INPUT EXTENSION POINT:
@@ -251,11 +251,11 @@ class Game:
         pygame.draw.circle(scr, (77, 163, 255), (int(self.px), int(self.py)), self.player_radius)
 
         pygame.draw.rect(scr, (34, 34, 34), (20, 14, 200, 10))
-        pygame.draw.rect(scr, (62, 207, 110) if self.hp > 30 else (229, 72, 77), (20, 14, 2 * max(0, self.hp), 10))
+        pygame.draw.rect(scr, (62, 207, 110) if self.hp / self.max_hp > 0.3 else (229, 72, 77), (20, 14, 200 * max(0, self.hp) / self.max_hp, 10))
 
         line1 = f"{self.profile['label']}  HP {self.hp}/{self.max_hp}  speed {self.player_speed:.0f}  hitbox {self.player_radius}"
         if self.auto:
-            line1 += f"  |  bot hit chance {miss_p(self.hp) * 100:.0f}%"
+            line1 += f"  |  bot miss chance {miss_p(self.hp / self.max_hp * 100) * 100:.0f}%"
         line1 += f"  |  hits {self.hits}  |  alive {self.t:.1f}s  |  best {max(self.best, self.t):.1f}s"
         line2 = (f"[F1-F4] brawler profile  [B] bot {'ON' if self.auto else 'OFF'}  [G] debug  [1/2] reaction {self.rd * 1000:.0f}ms  "
                  f"[3/4] noise {self.nz}px  [5/6] fire x{self.rate:.1f}")
